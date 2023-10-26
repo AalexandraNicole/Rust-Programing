@@ -67,12 +67,12 @@ fn char_to_number_hex(caracter: char) -> Result<String, Error> {
     if ascii < 1 || ascii > 127 {
         return Err(Error::CharacterIsNotAscii);
     }
-    if (caracter < '0' || caracter > '9') && (caracter < 'A' || caracter > 'F'){
+    if (caracter < '0' || caracter > '9') && (caracter < 'A' || caracter > 'F') {
         return Err(Error::CharacterIsNotDigit);
     } else {
         print!("{} \n", ascii as char);
-        let hex_string= format!("The hex number for {caracter} is : {:x}",ascii);
-        return Ok(hex_string)
+        let hex_string = format!("The hex number for {caracter} is : {:x}", ascii);
+        return Ok(hex_string);
     }
 }
 fn print_error_2(eroare: Result<char, Error>) {
@@ -106,9 +106,9 @@ fn main() {
     print_error_2(to_uppercase('a'));
     print_error_2(to_lowercase('0'));
     let n = char_to_number('1');
-    println!("{:?}",n);
+    println!("{:?}", n);
     let m = char_to_number_hex('D');
-    println!("{:?}",m);
+    println!("{:?}", m);
     print_error_2(print_char('a'));
     print_error(Error::CharacterIsNotAscii);
 }
