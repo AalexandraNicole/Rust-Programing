@@ -17,7 +17,7 @@ fn to_uppercase(caracter: char) -> Result<char, Error> {
             println!("{caracter}");
             return Ok(caracter);
         } else {
-            println!("{c_upper}");
+            //println!("{c_upper}");
             Ok(c_upper)
         }
     }
@@ -50,7 +50,7 @@ fn print_char(caracter: char) -> Result<char, Error> {
     Ok(caracter)
 }
 
-fn char_to_number(caracter: char) -> Result<char, Error> {
+fn char_to_number(caracter: char) -> Result<u8, Error> {
     let ascii = caracter as u8;
     if ascii < 1 || ascii > 127 {
         return Err(Error::CharacterIsNotAscii);
@@ -58,20 +58,21 @@ fn char_to_number(caracter: char) -> Result<char, Error> {
     if caracter <= '0' || caracter >= '9' {
         return Err(Error::CharacterIsNotDigit);
     } else {
-        print!("{} \n", ascii as char);
-        Ok(ascii as char)
+        print!("The decimal number for {caracter} is {} \n", ascii);
+        Ok(ascii)
     }
 }
-fn char_to_number_hex(caracter: char) -> Result<char, Error> {
+fn char_to_number_hex(caracter: char) -> Result<String, Error> {
     let ascii = caracter as u8;
     if ascii < 1 || ascii > 127 {
         return Err(Error::CharacterIsNotAscii);
     }
-    if caracter <= '0' || caracter >= '9' {
+    if (caracter < '0' || caracter > '9') && (caracter < 'A' || caracter > 'F'){
         return Err(Error::CharacterIsNotDigit);
     } else {
         print!("{} \n", ascii as char);
-        return Ok(ascii as char);
+        let hex_string= format!("The hex number for {caracter} is : {:x}",ascii);
+        return Ok(hex_string)
     }
 }
 fn print_error_2(eroare: Result<char, Error>) {
@@ -104,8 +105,10 @@ fn print_error(eroare: Error) {
 fn main() {
     print_error_2(to_uppercase('a'));
     print_error_2(to_lowercase('0'));
-    print_error_2(char_to_number('1'));
-    print_error_2(char_to_number_hex('2'));
+    let n = char_to_number('1');
+    println!("{:?}",n);
+    let m = char_to_number_hex('D');
+    println!("{:?}",m);
     print_error_2(print_char('a'));
-    print_error(Error::CharacterIsNotBase16Digit);
+    print_error(Error::CharacterIsNotAscii);
 }
