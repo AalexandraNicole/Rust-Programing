@@ -24,7 +24,7 @@ fn checked_multiplication(x: u32, y: u32) -> Result<u32, Error> {
 }
 
 fn main() {
-    let sum = checked_addition(12323, 12321);
+    let sum:Result<u32, Error> = checked_addition(12323, 12321);
     println!("Suma = {:?}", sum);
     let multi = checked_multiplication(126534, 63547);
     println!("{:?}", multi);
