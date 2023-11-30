@@ -1,5 +1,5 @@
 use std::fmt;
-use std::ops::{Add, Sub, Mul, Neg, Div};
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 struct Complex<T> {
@@ -42,7 +42,7 @@ impl<T: Sub<Output = T>> Sub for Complex<T> {
     }
 }
 
-impl<T: Add<Output = T> + Mul<Output = T> + Sub<Output = T>+Copy > Mul for Complex<T> {
+impl<T: Add<Output = T> + Mul<Output = T> + Sub<Output = T> + Copy> Mul for Complex<T> {
     type Output = Self;
 
     fn mul(self, other: Self) -> Self {
@@ -65,19 +65,37 @@ impl<T: fmt::Display + PartialEq + PartialOrd + Default + Copy> fmt::Display for
     }
 }
 
-impl<T: From<i32> + From<f64> + Div<Output = T> + Default + Neg<Output = T> + Mul<Output = T> + Copy> From<i32> for Complex<T> {
+impl<
+        T: From<i32>
+            + From<f64>
+            + Div<Output = T>
+            + Default
+            + Neg<Output = T>
+            + Mul<Output = T>
+            + Copy,
+    > From<i32> for Complex<T>
+{
     fn from(real: i32) -> Self {
         Complex::new(T::from(real), T::default())
     }
 }
 
-impl<T: From<i32> + From<f64> + Div<Output = T> + Default + Neg<Output = T> + Mul<Output = T> +Copy> From<f64> for Complex<T> {
+impl<
+        T: From<i32>
+            + From<f64>
+            + Div<Output = T>
+            + Default
+            + Neg<Output = T>
+            + Mul<Output = T>
+            + Copy,
+    > From<f64> for Complex<T>
+{
     fn from(real: f64) -> Self {
         Complex::new(T::from(real), T::default())
     }
 }
 
-impl <T:Neg <Output = T>> Neg for Complex<T> {
+impl<T: Neg<Output = T>> Neg for Complex<T> {
     type Output = Self;
     fn neg(self) -> Self::Output {
         Complex {
