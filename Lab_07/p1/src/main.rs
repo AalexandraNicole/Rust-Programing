@@ -2,17 +2,17 @@ use std::fmt;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-struct Complex<T> {
-    real: T,
-    imag: T,
+struct Complex {
+    real: f64,
+    imag: f64,
 }
 
-impl<T: Mul<Output = T> + Neg<Output = T> + Copy> Complex<T> {
+impl<T: Mul<Output = T> + Neg<Output = T> + Copy> Complex {
     fn new(real: T, imag: T) -> Self {
         Complex { real, imag }
     }
 
-    fn conjugate(&self) -> Complex<T> {
+    fn conjugate(&self) -> Complex {
         Complex {
             real: self.real,
             imag: -self.imag,
@@ -20,7 +20,7 @@ impl<T: Mul<Output = T> + Neg<Output = T> + Copy> Complex<T> {
     }
 }
 
-impl<T: Add<Output = T>> Add for Complex<T> {
+impl<T: Add<Output = T>> Add for Complex {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
@@ -31,7 +31,7 @@ impl<T: Add<Output = T>> Add for Complex<T> {
     }
 }
 
-impl<T: Sub<Output = T>> Sub for Complex<T> {
+impl<T: Sub<Output = T>> Sub for Complex {
     type Output = Self;
 
     fn sub(self, other: Self) -> Self {
@@ -42,7 +42,7 @@ impl<T: Sub<Output = T>> Sub for Complex<T> {
     }
 }
 
-impl<T: Add<Output = T> + Mul<Output = T> + Sub<Output = T> + Copy> Mul for Complex<T> {
+impl<T: Add<Output = T> + Mul<Output = T> + Sub<Output = T> + Copy> Mul for Complex {
     type Output = Self;
 
     fn mul(self, other: Self) -> Self {
@@ -53,7 +53,7 @@ impl<T: Add<Output = T> + Mul<Output = T> + Sub<Output = T> + Copy> Mul for Comp
     }
 }
 
-impl<T: fmt::Display + PartialEq + PartialOrd + Default + Copy> fmt::Display for Complex<T> {
+impl<T: fmt::Display + PartialEq + PartialOrd + Default + Copy> fmt::Display for Complex {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.imag < T::default() {
             write!(f, "{}{}i", self.real, self.imag)
@@ -73,7 +73,7 @@ impl<
             + Neg<Output = T>
             + Mul<Output = T>
             + Copy,
-    > From<i32> for Complex<T>
+    > From<i32> for Complex
 {
     fn from(real: i32) -> Self {
         Complex::new(T::from(real), T::default())
@@ -88,14 +88,14 @@ impl<
             + Neg<Output = T>
             + Mul<Output = T>
             + Copy,
-    > From<f64> for Complex<T>
+    > From<f64> for Complex
 {
     fn from(real: f64) -> Self {
-        Complex::new(T::from(real), T::default())
+        Complex::new(from(real), default())
     }
 }
 
-impl<T: Neg<Output = T>> Neg for Complex<T> {
+impl<T: Neg<Output = T>> Neg for Complex {
     type Output = Self;
     fn neg(self) -> Self::Output {
         Complex {
