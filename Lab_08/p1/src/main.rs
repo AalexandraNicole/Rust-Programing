@@ -1,5 +1,4 @@
 use std::{fs, collections::HashMap};
-//#[derive(Copy, PartialEq<char>)]
 
 fn p1(path: String) {
     let mut cuvinte_map:HashMap<String, i32> = HashMap :: new();
