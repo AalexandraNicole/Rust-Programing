@@ -1,24 +1,42 @@
-use std::io::{Read, Write};
+use std::io::{Read, Write, self};
 use std::net::TcpStream;
 
 fn main() {
-    let mut stream = TcpStream::connect("127.0.0.1:8080").expect("Failed to connect to server");
+    let stream = TcpStream::connect("127.0.0.1:8081").expect("Failed to connect to server");
 
-    let message = "Hello, server!";
-    println!("Sending message to server: {}", message);
+    loop {
+        println!("Enter comand: ");
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).expect("Faileed to read user input");
 
-    // Send data to the server
-    stream.write_all(message.as_bytes()).unwrap();
+        //trim whitespace and remove newline
+        let command = input.trim();
 
-    // Receive and print the server's response
-    let mut buffer = [0; 512];
-    match stream.read(&mut buffer) {
-        Ok(size) => {
-            let response = String::from_utf8_lossy(&buffer[..size]);
-            println!("Received response from server: {}", response);
+        if command.to_lowercase() == "exit" {
+            break;
         }
-        Err(e) => {
-            eprintln!("Error reading from server: {}", e);
-        }
+        
+        send_command(&stream, command.to_string());
     }
+}
+
+fn send_command(mut stream: &TcpStream, command: String) {
+    // XOR encryption before sending
+    let key: u8 = 42;
+    let mut encrypted_command = command.into_bytes();
+    for byte in encrypted_command.iter_mut() {
+        *byte ^= key;
+    }
+
+    stream.write_all(&encrypted_command).expect("Failed to write to stream");
+
+    let mut response = Vec::new();
+    stream.read_to_end(&mut response).expect("Failed to read from stream");
+
+    // XOR decryption after receiving
+    for byte in response.iter_mut() {
+        *byte ^= key;
+    }
+
+    println!("Server Response: {:?}", String::from_utf8_lossy(&response));
 }
