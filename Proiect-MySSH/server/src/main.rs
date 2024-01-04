@@ -1,5 +1,6 @@
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
+use std::process::Command;
 
 fn main() {
     let listener = TcpListener::bind("127.0.0.1:8081").expect("Failed to bind to address");
@@ -7,6 +8,7 @@ fn main() {
     for stream in listener.incoming() {
         match stream {
             Ok(mut stream) => {
+                println!("Client conected!");
                 std::thread::spawn(move || {
                     handle_client(&mut stream);
                 });
@@ -17,50 +19,79 @@ fn main() {
 }
 
 fn handle_client(stream: &mut TcpStream) {
-    let mut buffer = [0; 1024];
+    let mut buffer = [0; 4096];
 
-    loop {
-        stream.read(&mut buffer).expect("Failed to read from stream");
-
+    loop{
+        let bytes_read = stream.read(&mut buffer).expect("Failed to read from stream");
         // XOR encryption and decryption
         let key: u8 = 42;
-        for byte in buffer.iter_mut() {
+        for byte in buffer.iter_mut().take(bytes_read) {
             *byte ^= key;
         }
 
+        let from_client = String::from_utf8_lossy(&buffer[..bytes_read]);
+        
+        let command = from_client.trim();
+        println!("Comanda de la client: {}", command);
+
         // Exit if the client sends "exit" command
-        let command = String::from_utf8_lossy(&buffer);
         if command.trim().to_lowercase() == "exit" {
             println!("Client requested exit. Closing connection.");
-            break;
+            return;
         }
 
         // Execute the command using std::process::Command
-        let output = execute_command(&command);
+        let output = execute_command(command);
 
         // Encrypt the output before sending it back
         let mut encrypted_output = output.into_bytes();
+
         for byte in encrypted_output.iter_mut() {
             *byte ^= key;
         }
-
         stream.write_all(&encrypted_output).expect("Failed to write to stream");
     }
 }
 
 fn execute_command(command: &str) -> String {
-    // Execute the command using std::process::Command
-    use std::process::Command;
-    let output = Command::new("sh")
-        .arg("-c")
-        .arg(command)
-        .output();
+    let command_list: Vec<&str> = command.trim().split("&&").collect();
 
-    match output {
-        Ok(output) => String::from_utf8_lossy(&output.stdout).to_string(),
-        Err(e) => {
-            eprintln!("Failed to execute command: {}", e);
-            String::new()
+    for cmd in command_list {
+        let or_commands: Vec<&str> = cmd.trim().split("||").collect();
+
+        if let Some(or_cmd) = or_commands.first() {
+
+            let output = Command::new("sh")
+                .arg("-c")
+                .arg(or_cmd)
+                .output();
+
+            match output {
+                Ok(output) => {
+                    let result = String::from_utf8_lossy(&output.stdout).to_string();
+                    let status = output.status;
+                    let error_output = String::from_utf8_lossy(&output.stderr).to_string();
+
+                    if !status.success() && cmd.contains("||") {
+                        println!("Command failed: {}\n Error output {}", or_cmd,error_output);
+                        break;
+                    } else if !status.success() {
+                        println!("Command failed: {}\nError output {}",or_cmd,error_output);
+                    }
+                    return result;
+                }
+                Err(e) => {
+                    eprintln!("Command not found: {}", e);
+                    return String::from("Command not found");
+                }
+            }
+        }
+
+        if cmd.contains("&&") {
+            // All commands with "&&" succeeded
+            println!("All commands succeeded: {}", cmd);
         }
     }
+
+    String::new()
 }
