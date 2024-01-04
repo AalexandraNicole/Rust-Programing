@@ -56,29 +56,36 @@ fn handle_client(stream: &mut TcpStream) {
 fn execute_command(command: &str) -> String {
     let command_list: Vec<&str> = command.trim().split("&&").collect();
 
+    let mut result = String::new();
     for cmd in command_list {
         let or_commands: Vec<&str> = cmd.trim().split("||").collect();
 
         if let Some(or_cmd) = or_commands.first() {
+            let mut parts = or_cmd.split_whitespace();
+            let program = parts.next().unwrap_or("FAILD");
+            let args: Vec<&str> = parts.collect();
 
-            let output = Command::new("sh")
-                .arg("-c")
-                .arg(or_cmd)
+            let output = Command::new(program)
+                .args(&args)
+                .env("PATH", "/bin:/usr/bin")
                 .output();
 
             match output {
                 Ok(output) => {
-                    let result = String::from_utf8_lossy(&output.stdout).to_string();
+                    let result_str = String::from_utf8_lossy(&output.stdout).to_string();
                     let status = output.status;
                     let error_output = String::from_utf8_lossy(&output.stderr).to_string();
 
-                    if !status.success() && cmd.contains("||") {
-                        println!("Command failed: {}\n Error output {}", or_cmd,error_output);
+                    if !status.success() {
+                        result.push_str(&result_str);
+                    }else if status.success() && cmd.contains("||") {
+                        println!("Command failed1: {}\n Error output {}", or_cmd,error_output);
                         break;
-                    } else if !status.success() {
-                        println!("Command failed: {}\nError output {}",or_cmd,error_output);
+                    } else if status.success() {
+                        println!("Command failed2: {}\nError output {}",or_cmd,error_output);
+                        break;
                     }
-                    return result;
+                    return result_str;
                 }
                 Err(e) => {
                     eprintln!("Command not found: {}", e);
@@ -90,6 +97,9 @@ fn execute_command(command: &str) -> String {
         if cmd.contains("&&") {
             // All commands with "&&" succeeded
             println!("All commands succeeded: {}", cmd);
+        }else if cmd.contains("&&") && !result.is_empty() {
+            println!("Error executing && comants");
+            return String::from("Error executing && commands;");
         }
     }
 
