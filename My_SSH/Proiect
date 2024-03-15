@@ -1,1 +1,5 @@
-MY SSH
+MY SSH  
+Implement a client/server pair capable of encrypted authentication and communication.  
+The server will execute commands from the client and return their output to the client.  
+The commands are executable from the path with any number of arguments; cd and pwd will function normally.  
+Multiple commands can be executed sequentially or redirected using: |, <, >, &&, ||, ;.
